@@ -26,15 +26,15 @@ La base de datos del sueño CAP es una colección de 108 registros polisomnográ
 |__ requierements.txt                       # Dependencias
 
 5. INSTRUCCIONES
-# CLONAR EL PROYECTO
+CLONAR EL PROYECTO
 mkdir ~/code/ncspardo && cd "$_"
 git clone git@github.com:ncspardo/proyecto-lethe.git
 cd poryecto-lethe
 
-# VIRTUAL ENVIRONMENT
+VIRTUAL ENVIRONMENT
 pyenv local proyecto-lethe
 
-# INSTALAR DEPENDENCIAS
+INSTALAR DEPENDENCIAS
 pip install -r requirements.txt
 
 
