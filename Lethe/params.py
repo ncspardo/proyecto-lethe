@@ -2,7 +2,7 @@ import os
 import numpy as np
 
 ##################  VARIABLES  ##################
-ROOT_DIRECTORY = os.environ.get("ROOT_DIRECTORY")
+BACK_ROOT_DIRECTORY = os.environ.get("BACK_ROOT_DIRECTORY")
 DATA_SIZE = os.environ.get("DATA_SIZE")
 CHUNK_SIZE = int(os.environ.get("CHUNK_SIZE"))
 MODEL_TARGET = os.environ.get("MODEL_TARGET")
