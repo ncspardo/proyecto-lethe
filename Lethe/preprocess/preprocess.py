@@ -43,8 +43,8 @@ def preprocess (dir, pfile):
 
         newdf = pd.DataFrame(combined, columns=newcols)
 
-        filename = '/bigd/code/grinbea/lethe-website/test_data/'+key+'123.csv'
-        newdf.to_csv(filename,index=False)
+    #    filename = '/bigd/code/grinbea/lethe-website/test_data/'+key+'123.csv'
+    #    newdf.to_csv(filename,index=False)
 
         newdf['target'] = files_dict[key]
         dict[key] = pd.DataFrame(newdf)
@@ -71,7 +71,7 @@ def preprocess (dir, pfile):
 
     # Pipeline
     pipeline = Pipeline ([
-        ('pca', PCA(n_components=500)),
+#        ('pca', PCA(n_components=500)),
         ('scaler', MinMaxScaler())
     ])
 

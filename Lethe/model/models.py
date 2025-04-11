@@ -14,6 +14,10 @@ from tensorflow.keras import layers, models
 from tensorflow.keras import layers, optimizers, callbacks
 import numpy as np
 from sklearn.model_selection import GridSearchCV
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.layers import Dropout
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv1D, MaxPooling1D, GRU, Dense
 
 
 import xgboost as xgb
@@ -66,21 +70,34 @@ def XGBClassifier(X_train, y_train, X_test, y_test, X_val, y_val):
 
     return best_model
 
-def LogisticRegression(X_train, y_train, X_test, y_test, X_val, y_val):
+def LogRegression(X_train, y_train, X_test, y_test, X_val, y_val):
     # Logistic Regression
 
     # Instanciate model
     print('Trying a LogisticRegression model ... ')
-    model = LogisticRegression(max_iter=100, solver='newton-cg')
+    model = LogisticRegression(max_iter = 100,  penalty='l2', solver='newton-cg')
+    param_grid = {
+        'C': [0.1, 1],
+        'multi_class': ['ovr', 'multinomial']
+    }
 
-    model.fit(X_train, y_train)
+    grid_search = GridSearchCV (estimator = model, param_grid = param_grid,
+                scoring='accuracy', cv = 5, n_jobs=-1, verbose=1)
+
+    grid_search.fit(X_train, y_train)
+    print(grid_search.best_params_)
+
+    best_model = grid_search.best_estimator_
+
+    # Make predictions
+    y_pred = best_model.predict(X_test)
 
     #  Validate
     print('Cross validating model .. ')
     #cv_results = cross_validate(model, X_train, y_train, cv=5);
     #print("LogisticRegresion score: ", cv_results['test_score'].mean())
 
-    y_pred = model.predict(X_test)
+    y_pred = best_model.predict(X_test)
 
     print('Calculating scores ... ')
     # Accuracy score
@@ -98,7 +115,7 @@ def LogisticRegression(X_train, y_train, X_test, y_test, X_val, y_val):
     # F1-score
     f1 = f1_score(y_test,y_pred,average = 'weighted')
     print("LogisticRegresion f1: ", f1)
-    return model
+    return best_model
 
 def KNN(X_train, y_train, X_test, y_test, X_val, y_val):
     # ConfusionMatrix from predictions
@@ -128,20 +145,15 @@ def SVC(X_train, y_train, X_test, y_test, X_val, y_val):
 # CNN model
 def CNN(X_train, y_train, X_test, y_test, X_val, y_val):
     print('Trying a CNN + LSTM model ... ')
-    
-    # Define the model
-    model = models.Sequential([
-    #layers.Conv1D(64, 3, activation='relu', input_shape=(X_train.shape[1],1)),  # 1D convolution layer
-    #layers.MaxPooling1D(2),
-    #layers.Conv1D(128, 3, activation='relu'),
-    #layers.MaxPooling1D(2),
-    #layers.Flatten(),
-    #layers.Dense(64, activation='relu'),
-    layers.GRU(64, activation='tanh'),
-    layers.Dense(6, activation='softmax')  # Use softmax for multi-class classification
-])
 
-    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+    model = Sequential([
+        Conv1D(64, 3, activation='relu', input_shape=(X_train.shape[1], 1)),
+        MaxPooling1D(2),
+        GRU(64),
+        Dense(6, activation='softmax')
+    ])
+
+    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
     EarlyStopper = callbacks.EarlyStopping(monitor='val_loss',
                                        patience=1,
@@ -162,3 +174,4 @@ def CNN(X_train, y_train, X_test, y_test, X_val, y_val):
     print("val loss:     ", history.history['val_loss'][-1])
 
     return model
+
