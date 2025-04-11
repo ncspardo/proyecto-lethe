@@ -23,7 +23,7 @@ def apply_fft(df, n_features=1024, frecuencia_muestreo=512):
 base_path = '/home/gerardop/code/ncspardo/proyecto-lethe/Lethe/raw_data/'
 file_paths = {
     'healthy': 'bal_healthy.csv',
-    #'ins': 'bal_ins.csv',
+    'ins': 'bal_ins.csv',
     'narco': 'bal_narco.csv',
     #'nfle': 'bal_nfle.csv',
     #'plm': 'bal_plm.csv',
@@ -34,8 +34,8 @@ file_paths = {
 # Etiquetas para diagnóstico
 diagnostic_labels = {
     'healthy': 0,
-    #'ins': 1,
-    'narco': 1,
+    'ins': 1,
+    'narco': 3,
     #'nfle': 3,
     #'plm': 4,
     #'rbd': 5,
@@ -69,7 +69,7 @@ scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
 # Convertir etiquetas a formato one-hot
-y_one_hot = to_categorical(y, num_classes=2)  # Cambié a 7 clases
+y_one_hot = to_categorical(y, num_classes=3)  # Cambié a 3 clases
 
 # División train/test
 X_train, X_test, y_train, y_test = train_test_split(
@@ -95,7 +95,7 @@ model.add(Dense(64, activation='relu'))
 model.add(Dropout(0.5))
 
 # Capa de salida con 7 nodos (uno por cada clase) y activación softmax
-model.add(Dense(2, activation='softmax'))
+model.add(Dense(3, activation='softmax'))
 
 # Compilación del modelo
 model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=[tf.keras.metrics.Precision(name='precision'), tf.keras.metrics.Recall(name='recall')])
