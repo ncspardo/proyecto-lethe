@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from Lethe.main import mpredict
+from Lethe.main import predict
 
 app = FastAPI()
 
@@ -19,16 +19,21 @@ app.add_middleware(
 def predict(
        input_data: dict   # File with frequencies
     ):
-    
-    data = input_data['data']
-    column_list = list(data[0].keys())
-    values_list = list(data[0].values())
-    values_list = np.array(values_list).reshape(1, -1)
-    df = pd.DataFrame(values_list, columns=column_list)
-
-    diagnosis = mpredict(df)
+    df = pd.DataFrame(input_data)
+    diagnosis = predict(df)
     index = np.argmax(diagnosis)
-    return  {'diagnosis': str(index)}
+    return  {'diagnosis': index}
+
+@app.get("/predict")
+def predict(
+       input_data: dict   # File with frequencies
+    ):
+    
+    df = pd.DataFrame(input_data, columns=dict['keys'])
+    diagnosis = predict(df)
+    index = np.argmax(diagnosis)
+
+    return  {'diagnosis': index}
 
 @app.get("/")
 def root():
