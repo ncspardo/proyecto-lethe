@@ -11,7 +11,7 @@ from tensorflow.keras.callbacks import EarlyStopping
 import tensorflow as tf
 from sklearn.pipeline import Pipeline
 import pickle
-from params import *
+from Lethe.params import *
 
 # Función para aplicar FFT
 def apply_fft(df, n_features=1024, frecuencia_muestreo=512):
@@ -27,23 +27,23 @@ def fft_prep(base_path, pfile):
     # Rutas a los archivos
     file_paths = {
         'healthy': 'bal_healthy.csv',
-        'narco': 'bal_narco.csv'
+        'narco': 'bal_narco.csv',
+        'ins': 'bal_ins.csv',
+        'sdb': 'bal_sdb.csv'
+        #'plm': 'bal_plm.csv'
+        #'rbd': 'bal_rbd.csv'
         #'nfle': 'bal_nfle.csv'
-        #'rbd': 'bal_rbd.csv',
-        #'ins': 'bal_ins.csv',
-        #'plm': 'bal_plm.csv',
-        #'sdb': 'bal_sdb.csv',
     }
 
     # Etiquetas para diagnóstico
     diagnostic_labels = {
         'healthy': 0,
-        'narco': 1
+        'narco': 1,
+        'ins': 2,
+        'sdb': 3
+        #'plm': 4
         #'nfle': 2
         #'rbd': 3
-        #'plm': 4,
-        #'ins': 1,
-        #'sdb': 6,
     }
 
     # Cargar datasets
@@ -80,7 +80,7 @@ def fft_prep(base_path, pfile):
     y = df['Diagnostic'].values
 
     # Convertir etiquetas a formato one-hot
-    y_one_hot = to_categorical(y, num_classes=2)  # Cambié a 7 clases
+    y_one_hot = to_categorical(y, num_classes=4)  # Cambié a 7 clases
 
     # División train/test
     X_train, X_test, y_train, y_test = train_test_split(
@@ -109,7 +109,7 @@ def fft_model(X_train, y_train, X_test, y_test, X_val, y_val):
     model.add(Dropout(0.5))
 
     # Capa de salida con 7 nodos (uno por cada clase) y activación softmax
-    model.add(Dense(2, activation='softmax'))
+    model.add(Dense(4, activation='softmax'))
 
     # Compilación del modelo
     model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=[tf.keras.metrics.Precision(name='precision'), tf.keras.metrics.Recall(name='recall')])
