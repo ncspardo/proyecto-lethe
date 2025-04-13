@@ -12,6 +12,7 @@ import tensorflow as tf
 from sklearn.pipeline import Pipeline
 import pickle
 from Lethe.params import *
+from tensorflow.keras.optimizers import Adam
 
 # Función para aplicar FFT
 def apply_fft(df, n_features=1024, frecuencia_muestreo=512):
@@ -112,14 +113,29 @@ def fft_model(X_train, y_train, X_test, y_test, X_val, y_val):
     model.add(Dense(4, activation='softmax'))
 
     # Compilación del modelo
-    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=[tf.keras.metrics.Precision(name='precision'), tf.keras.metrics.Recall(name='recall')])
+    optimizer = Adam(
+    learning_rate=0.001,
+    beta_1=0.85,
+    beta_2=0.995,
+    epsilon=1e-6,
+    amsgrad=True)
+
+    model.compile(optimizer=optimizer, loss='categorical_crossentropy', metrics=[tf.keras.metrics.Precision(name='precision'), tf.keras.metrics.Recall(name='recall')])
 
     # Early stopping para evitar sobreajuste
-    early_stopping = EarlyStopping(monitor='val_loss', patience=5)
+    early_stopping = EarlyStopping(monitor='val_precision', patience=20, mode='max')
+    reduce_lr = tf.keras.callbacks.ReduceLROnPlateau(
+    monitor='val_precision', # can also be 'val_accuracy'
+    factor=0.3, # reduce by a factor (e.g., halve it)
+    patience=3, # wait 3 epochs with no improvement
+    min_lr=1e-6, # minimum learning rate
+    verbose=1,
+    mode= 'max'
+    )
 
     # Entrenamiento
     print("Entrenando modelo de Red Neuronal...")
-    model.fit(X_train, y_train, epochs=50, batch_size=64, callbacks=[early_stopping], verbose=1, validation_split=0.2)
+    model.fit(X_train, y_train, epochs=150, batch_size=64, verbose=1, validation_split=0.2, callbacks=[early_stopping, reduce_lr])
 
     # Evaluación del modelo
     y_pred = model.predict(X_test)
